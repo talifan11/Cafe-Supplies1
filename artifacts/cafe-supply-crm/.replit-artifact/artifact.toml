@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Cafe Supply CRM"
+description = "A B2B ordering storefront and lightweight order CRM for cafes buying everyday supplies such as napkins, gloves, and cleaning products."
+version = "1.0.0"
+id = "artifacts/cafe-supply-crm"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19496
+
+[services.development]
+run = "pnpm --filter @workspace/cafe-supply-crm run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cafe-supply-crm", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cafe-supply-crm/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19496"
+BASE_PATH = "/"

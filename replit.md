@@ -1,6 +1,6 @@
-# [Project name]
+# Поставка — магазин расходников для кафе
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Web-магазин для заказа расходных материалов HoReCa и лёгкая CRM-панель для обработки заказов менеджером.
 
 ## Run & Operate
 
@@ -22,15 +22,23 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/cafe-supply-crm/src/App.tsx` — клиентский каталог, корзина, оформление заказа и CRM-панель.
+- `artifacts/cafe-supply-crm/src/index.css` — визуальная тема и адаптивная вёрстка.
+- `artifacts/api-server/src/routes/catalog.ts` — товары и категории.
+- `artifacts/api-server/src/routes/orders.ts` — создание заказов, сводка и статусы.
+- `lib/db/src/schema/` — таблицы товаров, заказов и позиций заказа.
+- `lib/api-spec/openapi.yaml` — источник API-контракта.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Заказ создаётся транзакционно: остатки проверяются и уменьшаются вместе с записью заказа и его позиций.
+- Цены копируются в позиции заказа при оформлении, чтобы история не менялась после обновления каталога.
+- Корзина хранится в браузере и восстанавливается после перезагрузки; каталог и CRM получают данные через сгенерированные API hooks.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Клиент видит каталог с поиском и фильтрами по категориям, добавляет товары в корзину, меняет количества и оформляет доставку.
+- Менеджер входит в панель `/admin`, видит заказы и сводные показатели, фильтрует заказы и переводит их между статусами.
 
 ## User preferences
 

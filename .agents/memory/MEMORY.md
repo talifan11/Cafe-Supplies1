@@ -1,0 +1,1 @@
+- [OpenAPI integer schemas](openapi-integer-schemas.md) — this workspace's generated Zod client currently targets Zod 3, so integer fields need a compatibility workaround.
