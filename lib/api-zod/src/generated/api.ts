@@ -9,6 +9,37 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Sign in as catalog manager
+ */
+
+
+
+
+export const AdminLoginBody = zod.object({
+  "login": zod.string().min(1),
+  "password": zod.string().min(1)
+})
+
+export const AdminLoginResponse = zod.object({
+  "authenticated": zod.boolean()
+})
+
+
+/**
+ * @summary Sign out the catalog manager
+ */
+export const AdminLogoutResponse = zod.void()
+
+
+/**
+ * @summary Check manager session
+ */
+export const GetAdminSessionResponse = zod.object({
+  "authenticated": zod.boolean()
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */
@@ -31,16 +62,156 @@ export const ListProductsResponseItem = zod.object({
   "price": zod.number(),
   "quantity": zod.number(),
   "category": zod.string(),
+  "subcategory": zod.string(),
+  "description": zod.string(),
   "imageUrl": zod.string()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
 
 
 /**
+ * @summary Create a catalog product
+ */
+export const createProductBodyNameMin = 2;
+
+export const createProductBodyPriceMin = 0;
+
+export const createProductBodyQuantityMin = 0;
+
+
+
+
+
+export const CreateProductBody = zod.object({
+  "name": zod.string().min(createProductBodyNameMin),
+  "description": zod.string().optional(),
+  "price": zod.number().min(createProductBodyPriceMin),
+  "quantity": zod.number().min(createProductBodyQuantityMin),
+  "category": zod.string().min(1),
+  "subcategory": zod.string(),
+  "imageUrl": zod.string().min(1)
+})
+
+export const CreateProductResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "price": zod.number(),
+  "quantity": zod.number(),
+  "category": zod.string(),
+  "subcategory": zod.string(),
+  "description": zod.string(),
+  "imageUrl": zod.string()
+})
+
+
+/**
+ * @summary Update a catalog product
+ */
+export const UpdateProductParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const updateProductBodyNameMin = 2;
+
+export const updateProductBodyPriceMin = 0;
+
+export const updateProductBodyQuantityMin = 0;
+
+
+
+
+
+export const UpdateProductBody = zod.object({
+  "name": zod.string().min(updateProductBodyNameMin).optional(),
+  "description": zod.string().optional(),
+  "price": zod.number().min(updateProductBodyPriceMin).optional(),
+  "quantity": zod.number().min(updateProductBodyQuantityMin).optional(),
+  "category": zod.string().min(1).optional(),
+  "subcategory": zod.string().optional(),
+  "imageUrl": zod.string().min(1).optional()
+})
+
+export const UpdateProductResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "price": zod.number(),
+  "quantity": zod.number(),
+  "category": zod.string(),
+  "subcategory": zod.string(),
+  "description": zod.string(),
+  "imageUrl": zod.string()
+})
+
+
+/**
+ * @summary Delete a catalog product
+ */
+export const DeleteProductParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteProductResponse = zod.void()
+
+
+/**
  * @summary List product categories
  */
-export const ListCategoriesResponseItem = zod.string()
+export const ListCategoriesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "parentId": zod.number().nullable()
+})
 export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem)
+
+
+/**
+ * @summary Create a category or subcategory
+ */
+
+
+
+export const CreateCategoryBody = zod.object({
+  "name": zod.string().min(1),
+  "parentId": zod.number().nullish()
+})
+
+export const CreateCategoryResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "parentId": zod.number().nullable()
+})
+
+
+/**
+ * @summary Update a category or subcategory
+ */
+export const UpdateCategoryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const UpdateCategoryBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "parentId": zod.number().nullish()
+})
+
+export const UpdateCategoryResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "parentId": zod.number().nullable()
+})
+
+
+/**
+ * @summary Delete a category or subcategory
+ */
+export const DeleteCategoryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteCategoryResponse = zod.void()
 
 
 /**
@@ -138,5 +309,35 @@ export const UpdateOrderStatusResponse = zod.object({
   "lineTotal": zod.number()
 }))
 })
+
+
+/**
+ * @summary Request a presigned URL for an image upload
+ */
+
+
+
+
+
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string().min(1),
+  "size": zod.number().min(1),
+  "contentType": zod.string().min(1)
+})
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string(),
+  "objectPath": zod.string()
+})
+
+
+/**
+ * @summary Serve an uploaded image
+ */
+export const GetStorageObjectParams = zod.object({
+  "objectPath": zod.coerce.string()
+})
+
+export const GetStorageObjectResponse = zod.unknown()
 
 

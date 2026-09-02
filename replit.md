@@ -9,7 +9,7 @@ Web-магазин для заказа расходных материалов H
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL`, `SESSION_SECRET`, and Replit App Storage variables for manager uploads.
 
 ## Stack
 
@@ -34,11 +34,13 @@ Web-магазин для заказа расходных материалов H
 - Заказ создаётся транзакционно: остатки проверяются и уменьшаются вместе с записью заказа и его позиций.
 - Цены копируются в позиции заказа при оформлении, чтобы история не менялась после обновления каталога.
 - Корзина хранится в браузере и восстанавливается после перезагрузки; каталог и CRM получают данные через сгенерированные API hooks.
+- Фото товаров хранятся в App Storage, а в PostgreSQL сохраняется только URL объекта; URL загрузки выдаётся только активной сессии менеджера.
 
 ## Product
 
 - Клиент видит каталог с поиском и фильтрами по категориям, добавляет товары в корзину, меняет количества и оформляет доставку.
 - Менеджер входит в панель `/admin`, видит заказы и сводные показатели, фильтрует заказы и переводит их между статусами.
+- В панели `/admin` менеджер управляет товарами и иерархией категорий: добавляет/редактирует/удаляет товары, фото, цены, описания, остатки и подкатегории.
 
 ## User preferences
 

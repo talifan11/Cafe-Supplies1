@@ -1,1 +1,2 @@
 - [OpenAPI integer schemas](openapi-integer-schemas.md) — this workspace's generated Zod client currently targets Zod 3, so integer fields need a compatibility workaround.
+- [Catalog storage and manager auth](catalog-storage-auth.md) — product photos live in App Storage and catalog writes require a signed manager session.

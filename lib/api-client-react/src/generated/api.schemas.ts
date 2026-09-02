@@ -9,13 +9,77 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface AdminLoginInput {
+  /** @minLength 1 */
+  login: string;
+  /** @minLength 1 */
+  password: string;
+}
+
+export interface AdminSession {
+  authenticated: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
   price: number;
   quantity: number;
   category: string;
+  subcategory: string;
+  description: string;
   imageUrl: string;
+}
+
+export interface ProductInput {
+  /** @minLength 2 */
+  name: string;
+  description?: string;
+  /** @minimum 0 */
+  price: number;
+  /** @minimum 0 */
+  quantity: number;
+  /** @minLength 1 */
+  category: string;
+  subcategory: string;
+  /** @minLength 1 */
+  imageUrl: string;
+}
+
+export interface ProductUpdate {
+  /** @minLength 2 */
+  name?: string;
+  description?: string;
+  /** @minimum 0 */
+  price?: number;
+  /** @minimum 0 */
+  quantity?: number;
+  /** @minLength 1 */
+  category?: string;
+  subcategory?: string;
+  /** @minLength 1 */
+  imageUrl?: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  /** @nullable */
+  parentId: number | null;
+}
+
+export interface CategoryInput {
+  /** @minLength 1 */
+  name: string;
+  /** @nullable */
+  parentId?: number | null;
+}
+
+export interface CategoryUpdate {
+  /** @minLength 1 */
+  name?: string;
+  /** @nullable */
+  parentId?: number | null;
 }
 
 export interface OrderItem {
@@ -94,6 +158,20 @@ export interface OrderSummary {
 
 export interface ErrorResponse {
   error: string;
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
 }
 
 export type ListProductsParams = {

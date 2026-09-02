@@ -6,13 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Product {
+export interface Category {
   id: number;
   name: string;
-  price: number;
-  quantity: number;
-  category: string;
-  subcategory: string;
-  description: string;
-  imageUrl: string;
+  /** @nullable */
+  parentId: number | null;
 }

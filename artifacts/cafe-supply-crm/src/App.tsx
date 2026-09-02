@@ -9,6 +9,8 @@ import {
   getGetOrderSummaryQueryKey,
   getListOrdersQueryKey,
   getListProductsQueryKey,
+  useAdminLogin,
+  useAdminLogout,
   useCreateOrder,
   useGetOrderSummary,
   useListCategories,
@@ -19,6 +21,7 @@ import {
 import type { Order, OrderInput, OrderStatus, Product } from "@workspace/api-client-react";
 import { ArrowRight, Check, ChevronDown, ClipboardList, Clock3, Minus, Package, Plus, Search, ShoppingBag, Sparkles, Truck, X } from "lucide-react";
 import NotFound from "@/pages/not-found";
+import { CatalogManager } from "@/components/catalog-manager";
 
 type CartLine = { product: Product; quantity: number };
 type CheckoutForm = Pick<OrderInput, "clientName" | "phone" | "address">;
@@ -55,6 +58,7 @@ function ProductCard({ product, onAdd, cartQuantity }: { product: Product; onAdd
       <div className="product-content">
         <div className="stock-line"><span className={product.quantity < 10 ? "stock low" : "stock"}>{product.quantity < 10 ? "Заканчивается" : "В наличии"}</span><span>{product.quantity} шт.</span></div>
         <h3 data-testid={`text-product-name-${product.id}`}>{product.name}</h3>
+        {product.description && <p className="product-description">{product.description}</p>}
         <div className="product-bottom"><strong data-testid={`text-price-${product.id}`}>{currency.format(product.price)}</strong><button className={cartQuantity ? "add-button added" : "add-button"} onClick={() => onAdd(product)} data-testid={`button-add-product-${product.id}`}>{cartQuantity ? <><Check size={16} /> В корзине · {cartQuantity}</> : <><Plus size={16} /> В корзину</>}</button></div>
       </div>
     </article>
@@ -111,7 +115,7 @@ function Catalog() {
   const onSuccess = (id: number) => { setCart([]); setCheckoutOpen(false); setSuccessId(id); queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() }); queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() }); queryClient.invalidateQueries({ queryKey: getGetOrderSummaryQueryKey() }); };
   if (successId) return <main className="success-wrap"><OrderSuccess orderId={successId} onContinue={() => setSuccessId(null)} /></main>;
   return <main className="catalog-page"><section className="catalog-hero"><div><span className="eyebrow">Поставка для HoReCa</span><h1>Всё, что нужно<br /><i>для рабочей смены.</i></h1><p>Расходные материалы с доставкой в удобное для вас время. Соберём заказ сегодня — привезём завтра.</p></div><div className="hero-stamp"><span>01</span><small>закажите<br />до 18:00</small></div></section>
-    <section className="catalog-layout"><div className="catalog-main"><div className="catalog-toolbar"><div className="search-wrap"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Найти товар..." aria-label="Поиск товаров" data-testid="input-search" /></div><div className="category-tabs"><button className={!category ? "category-tab active" : "category-tab"} onClick={() => setCategory("")} data-testid="button-category-all">Все товары</button>{(categoriesQuery.data ?? []).map((item) => <button key={item} className={category === item ? "category-tab active" : "category-tab"} onClick={() => setCategory(item)} data-testid={`button-category-${item}`}>{item}</button>)}</div></div>
+     <section className="catalog-layout"><div className="catalog-main"><div className="catalog-toolbar"><div className="search-wrap"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Найти товар..." aria-label="Поиск товаров" data-testid="input-search" /></div><div className="category-tabs"><button className={!category ? "category-tab active" : "category-tab"} onClick={() => setCategory("")} data-testid="button-category-all">Все товары</button>{(categoriesQuery.data ?? []).filter((item) => item.parentId === null).map((item) => <button key={item.id} className={category === item.name ? "category-tab active" : "category-tab"} onClick={() => setCategory(item.name)} data-testid={`button-category-${item.name}`}>{item.name}</button>)}</div></div>
       <div className="results-line"><span>{search || category ? `Найдено: ${products.length}` : "Популярное для кухни"} </span><span>Обновлено сегодня <span className="online-dot" /></span></div>
       {productsQuery.isLoading ? <div className="loading-state">Загружаем каталог...</div> : products.length ? <div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} onAdd={addProduct} cartQuantity={cart.find((line) => line.product.id === product.id)?.quantity ?? 0} />)}</div> : <div className="empty-state"><Search size={24} /><h3>Ничего не нашли</h3><p>Попробуйте изменить запрос или выбрать другую категорию.</p></div>}
     </div><Cart cart={cart} setCart={setCart} onCheckout={() => setCheckoutOpen(true)} /></section>
@@ -124,19 +128,29 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const submit = (event: FormEvent) => { event.preventDefault(); if (login === "admin" && password === "123456") { sessionStorage.setItem("cafe-admin", "true"); onLogin(); } else setError("Неверный логин или пароль"); };
-  return <main className="admin-login"><div className="login-card"><span className="brand-mark"><Sparkles size={18} /></span><span className="eyebrow">Панель менеджера</span><h1>С возвращением.</h1><p>Войдите, чтобы управлять заказами.</p><form onSubmit={submit}><label>Логин<input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" data-testid="input-admin-login" /></label><label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" data-testid="input-admin-password" /></label>{error && <span className="form-error">{error}</span>}<button className="primary-button" type="submit" data-testid="button-admin-login">Войти <ArrowRight size={17} /></button></form><small>Доступ для менеджера</small></div></main>;
+  const loginMutation = useAdminLogin();
+  const submit = (event: FormEvent) => { event.preventDefault(); setError(""); loginMutation.mutate({ data: { login, password } }, { onSuccess: onLogin, onError: () => setError("Неверный логин или пароль") }); };
+  return <main className="admin-login"><div className="login-card"><span className="brand-mark"><Sparkles size={18} /></span><span className="eyebrow">Панель менеджера</span><h1>С возвращением.</h1><p>Войдите, чтобы управлять заказами и каталогом.</p><form onSubmit={submit}><label>Логин<input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" data-testid="input-admin-login" /></label><label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" data-testid="input-admin-password" /></label>{error && <span className="form-error">{error}</span>}<button className="primary-button" type="submit" disabled={loginMutation.isPending} data-testid="button-admin-login">{loginMutation.isPending ? "Проверяем..." : <>Войти <ArrowRight size={17} /></>}</button></form><small>Доступ для менеджера</small></div></main>;
 }
 
 function Admin() {
-  const [loggedIn, setLoggedIn] = useState(() => sessionStorage.getItem("cafe-admin") === "true");
+  const [loggedIn, setLoggedIn] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const queryClient = useQueryClient();
-  const ordersQuery = useListOrders({ status: (statusFilter || undefined) as "new" | "picking" | "delivery" | "completed" | undefined });
-  const summaryQuery = useGetOrderSummary();
+  const logoutMutation = useAdminLogout();
+  const orderParams = { status: (statusFilter || undefined) as "new" | "picking" | "delivery" | "completed" | undefined };
+  const ordersQuery = useListOrders(orderParams, { query: { queryKey: getListOrdersQueryKey(orderParams), enabled: loggedIn } });
+  const summaryQuery = useGetOrderSummary({ query: { queryKey: getGetOrderSummaryQueryKey(), enabled: loggedIn } });
   const updateStatus = useUpdateOrderStatus();
   const orders = ordersQuery.data ?? [];
   const summary = summaryQuery.data;
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/admin/session").then((response) => {
+      if (active && response.ok) setLoggedIn(true);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   if (!loggedIn) return <AdminLogin onLogin={() => setLoggedIn(true)} />;
   const changeStatus = (order: Order, status: OrderStatus) => updateStatus.mutate({ id: order.id, data: { status } }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() }); queryClient.invalidateQueries({ queryKey: getGetOrderSummaryQueryKey() }); } });
   const summaryCards: Array<{ label: string; value: ReactNode; icon: typeof ClipboardList }> = [
@@ -145,11 +159,11 @@ function Admin() {
     { label: "В работе", value: (summary?.pickingOrders ?? 0) + (summary?.deliveryOrders ?? 0), icon: Truck },
     { label: "Выручка", value: currency.format(summary?.totalRevenue ?? 0), icon: ShoppingBag },
   ];
-  return <main className="admin-page"><section className="admin-heading"><div><span className="eyebrow">Операционная панель</span><h1>Заказы</h1><p>Следите за сборкой и доставкой в одном месте.</p></div><button className="outline-button" onClick={() => { sessionStorage.removeItem("cafe-admin"); setLoggedIn(false); }} data-testid="button-admin-logout">Выйти</button></section>
+  return <main className="admin-page"><section className="admin-heading"><div><span className="eyebrow">Операционная панель</span><h1>Заказы</h1><p>Следите за сборкой и доставкой в одном месте.</p></div><button className="outline-button" onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => setLoggedIn(false) })} data-testid="button-admin-logout">Выйти</button></section>
     <section className="summary-grid">{summaryCards.map(({ label, value, icon: Icon }) => <div className="summary-card" key={label}><Icon size={18} /><span>{label}</span><strong data-testid={`summary-${label}`}>{value}</strong></div>)}</section>
     <section className="orders-card"><div className="orders-toolbar"><h2>Все заказы</h2><div className="status-filter">{["", "new", "picking", "delivery", "completed"].map((item) => <button key={item || "all"} className={statusFilter === item ? "filter-pill active" : "filter-pill"} onClick={() => setStatusFilter(item)} data-testid={`button-filter-${item || "all"}`}>{item ? statusLabels[item as OrderStatus] : "Все"}</button>)}</div></div>
       {ordersQuery.isLoading ? <div className="loading-state">Загружаем заказы...</div> : orders.length === 0 ? <div className="empty-state"><ClipboardList size={24} /><h3>Заказов пока нет</h3><p>Новые заказы клиентов появятся здесь.</p></div> : <div className="orders-list">{orders.map((order) => { const Icon = statusIcons[order.status]; return <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}><div className="order-number">№{String(order.id).padStart(4, "0")}<small>{new Date(order.createdAt).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" })}</small></div><div className="order-client"><strong>{order.clientName}</strong><span>{order.phone} · {order.address}</span><small>{order.items.map((item) => `${item.productName} × ${item.quantity}`).join(", ")}</small></div><strong className="order-total">{currency.format(order.totalSum)}</strong><div className={`status-badge status-${order.status}`}><Icon size={14} />{statusLabels[order.status]}</div><div className="status-select-wrap"><select value={order.status} onChange={(event) => changeStatus(order, event.target.value as OrderStatus)} disabled={updateStatus.isPending} aria-label={`Статус заказа ${order.id}`} data-testid={`select-status-${order.id}`}>{Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><ChevronDown size={14} /></div></div>; })}</div>}
-    </section></main>;
+     </section><CatalogManager /></main>;
 }
 
 function Router() {

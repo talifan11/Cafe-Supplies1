@@ -10,6 +10,7 @@ import {
   UpdateOrderStatusParams,
   UpdateOrderStatusResponse,
 } from "@workspace/api-zod";
+import { requireAdmin } from "../lib/adminAuth";
 import {
   db,
   orderItemsTable,
@@ -57,7 +58,7 @@ async function getOrderWithItems(id: number) {
   };
 }
 
-router.get("/orders", async (req, res): Promise<void> => {
+router.get("/orders", requireAdmin, async (req, res): Promise<void> => {
   const query = ListOrdersQueryParams.safeParse(req.query);
   if (!query.success) {
     res.status(400).json({ error: query.error.message });
@@ -140,7 +141,7 @@ router.post("/orders", async (req, res): Promise<void> => {
   res.status(201).json(CreateOrderResponse.parse(created));
 });
 
-router.get("/orders/summary", async (_req, res): Promise<void> => {
+router.get("/orders/summary", requireAdmin, async (_req, res): Promise<void> => {
   const [totals] = await db
     .select({
       totalOrders: sql<number>`count(*)`,
@@ -165,7 +166,7 @@ router.get("/orders/summary", async (_req, res): Promise<void> => {
   );
 });
 
-router.patch("/orders/:id/status", async (req, res): Promise<void> => {
+router.patch("/orders/:id/status", requireAdmin, async (req, res): Promise<void> => {
   const params = UpdateOrderStatusParams.safeParse(req.params);
   const body = UpdateOrderStatusBody.safeParse(req.body);
   if (!params.success || !body.success) {

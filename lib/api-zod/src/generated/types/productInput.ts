@@ -6,13 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Product {
-  id: number;
+export interface ProductInput {
+  /** @minLength 2 */
   name: string;
+  description?: string;
+  /** @minimum 0 */
   price: number;
+  /** @minimum 0 */
   quantity: number;
+  /** @minLength 1 */
   category: string;
   subcategory: string;
-  description: string;
+  /** @minLength 1 */
   imageUrl: string;
 }
