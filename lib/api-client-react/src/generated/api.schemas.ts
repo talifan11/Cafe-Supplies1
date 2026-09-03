@@ -177,6 +177,7 @@ export interface UploadUrlResponse {
 export type ListProductsParams = {
 search?: string;
 category?: string;
+subcategory?: string;
 };
 
 export type ListOrdersParams = {

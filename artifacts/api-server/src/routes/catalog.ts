@@ -51,6 +51,9 @@ router.get("/products", async (req, res): Promise<void> => {
   if (query.data.category) {
     conditions.push(eq(productsTable.category, query.data.category));
   }
+  if (query.data.subcategory) {
+    conditions.push(eq(productsTable.subcategory, query.data.subcategory));
+  }
 
   const products = await db
     .select()

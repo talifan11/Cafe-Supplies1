@@ -9,4 +9,5 @@
 export type ListProductsParams = {
 search?: string;
 category?: string;
+subcategory?: string;
 };

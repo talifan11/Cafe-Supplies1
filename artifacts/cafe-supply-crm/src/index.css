@@ -50,6 +50,16 @@ button { cursor: pointer; }
 .category-tab, .filter-pill { border: 0; background: transparent; color: var(--ink-soft); font-size: 12px; padding: 9px 10px; border-radius: 3px; white-space: nowrap; }
 .category-tab.active, .filter-pill.active { background: var(--ink); color: var(--paper); }
 .category-tab:hover, .filter-pill:hover { color: var(--ink); }
+.subcategory-panel { margin-top: 13px; padding: 13px 15px; border-left: 3px solid var(--lime-dark); background: var(--mint); display: flex; align-items: center; gap: 22px; }
+.subcategory-heading { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
+.subcategory-marker { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
+.subcategory-heading strong, .subcategory-heading small { display: block; }
+.subcategory-heading strong { font-size: 11px; letter-spacing: -.02em; }
+.subcategory-heading small { margin-top: 3px; color: var(--ink-soft); font-size: 10px; }
+.subcategory-tabs { min-width: 0; display: flex; align-items: center; gap: 6px; overflow-x: auto; }
+.subcategory-tab { border: 1px solid transparent; background: rgba(255,255,255,.52); color: var(--ink-soft); border-radius: 999px; padding: 7px 11px; font-size: 10px; white-space: nowrap; transition: .2s; }
+.subcategory-tab:hover { border-color: var(--lime-dark); color: var(--ink); }
+.subcategory-tab.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .results-line { display: flex; justify-content: space-between; color: var(--ink-soft); font: 10px var(--app-font-mono); text-transform: uppercase; letter-spacing: .05em; padding: 18px 0; }
 .results-line > span:last-child { display: flex; align-items: center; gap: 7px; }
 .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }

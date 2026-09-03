@@ -98,6 +98,11 @@ paths:
           required: false
           schema:
             type: string
+        - name: subcategory
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Product list

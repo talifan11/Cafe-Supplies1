@@ -53,7 +53,8 @@ export const HealthCheckResponse = zod.object({
  */
 export const ListProductsQueryParams = zod.object({
   "search": zod.coerce.string().optional(),
-  "category": zod.coerce.string().optional()
+  "category": zod.coerce.string().optional(),
+  "subcategory": zod.coerce.string().optional()
 })
 
 export const ListProductsResponseItem = zod.object({
