@@ -1,0 +1,42 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "🚀 Начинаем обновление Cafe-Supplies..."
+            cd /var/www/cafe-supplies
+            
+            git pull origin main
+            pnpm install
+            pnpm approve-builds
+            
+            # Создаем файл с настройками БД
+            echo 'DATABASE_URL=postgresql://cafe_user:cafe_pass_123@localhost:5432/cafe_supplies' > lib/db/.env
+            
+            # Собираем проект
+            pnpm --filter @workspace/api-server run build
+            PORT=5173 BASE_PATH=/ pnpm --filter @workspace/cafe-supply-crm run build
+            
+            # Обновляем БД
+            DATABASE_URL="postgresql://cafe_user:cafe_pass_123@localhost:5432/cafe_supplies" pnpm --filter @workspace/db run push
+            
+            # Перезапускаем через экосистему
+            pm2 restart cafe-api || pm2 start ecosystem.config.js
+            pm2 save
+            
+            echo "✅ Деплой успешно завершен!"
