@@ -21,21 +21,22 @@ jobs:
             echo "🚀 Начинаем обновление Cafe-Supplies..."
             cd /var/www/cafe-supplies
             
-            # Забираем свежий код
             git pull origin main
-            
-            # Устанавливаем зависимости
             pnpm install
+            pnpm approve-builds
             
-            # Собираем только нужные части (API и Frontend)
-            pnpm run typecheck
+            # Создаем файл с настройками БД
+            echo 'DATABASE_URL=postgresql://cafe_user:cafe_pass_123@localhost:5432/cafe_supplies' > lib/db/.env
+            
+            # Собираем проект
             pnpm --filter @workspace/api-server run build
-            pnpm --filter @workspace/cafe-supply-crm run build
+            PORT=5173 BASE_PATH=/ pnpm --filter @workspace/cafe-supply-crm run build
             
-            # Применяем изменения в базе данных
-            pnpm --filter @workspace/db run push
+            # Обновляем БД
+            DATABASE_URL="postgresql://cafe_user:cafe_pass_123@localhost:5432/cafe_supplies" pnpm --filter @workspace/db run push
             
-            # Перезапускаем API сервер через PM2
-            pm2 restart cafe-api || pm2 start artifacts/api-server/dist/index.mjs --name cafe-api
+            # Перезапускаем через экосистему
+            pm2 restart cafe-api || pm2 start ecosystem.config.js
+            pm2 save
             
             echo "✅ Деплой успешно завершен!"
