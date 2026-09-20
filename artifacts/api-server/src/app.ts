@@ -1,5 +1,4 @@
 import express, { type Express } from "express";
-import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -25,7 +24,7 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// CORS is now configured in index.ts with credentials support
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

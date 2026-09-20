@@ -56,7 +56,10 @@ export function isAdminRequest(req: Parameters<RequestHandler>[0]): boolean {
 }
 
 export function setAdminSession(res: Parameters<RequestHandler>[1]): void {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  // For HTTP connections (non-production or when explicitly disabled), don't use Secure flag
+  const isProduction = process.env.NODE_ENV === "production";
+  const useSecure = process.env.COOKIE_SECURE === "true" || (isProduction && process.env.COOKIE_SECURE !== "false");
+  const secure = useSecure ? "; Secure" : "";
   res.setHeader("Set-Cookie", `${SESSION_COOKIE}=${createToken()}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; SameSite=Lax${secure}`);
 }
 
