@@ -138,7 +138,33 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [error, setError] = useState("");
   const loginMutation = useAdminLogin();
   const submit = (event: FormEvent) => { event.preventDefault(); setError(""); loginMutation.mutate({ data: { login, password } }, { onSuccess: onLogin, onError: () => setError("Неверный логин или пароль") }); };
-  return <main className="admin-login"><div className="login-card"><span className="brand-mark"><Sparkles size={18} /></span><span className="eyebrow">Панель менеджера</span><h1>С возвращением.</h1><p>Войдите, чтобы управлять заказами и каталогом.</p><form onSubmit={submit}><label>Логин<input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" data-testid="input-admin-login" /></label><label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" data-testid="input-admin-password" /></label>{error && <span className="form-error">{error}</span>}<button className="primary-button" type="submit" disabled={loginMutation.isPending} data-testid="button-admin-login">{loginMutation.isPending ? "Проверяем..." : <>Войти <ArrowRight size={17} /></>}</button></form><small>Доступ для менеджера</small></div></main>;
+  return (
+    <main className="admin-login">
+      <div className="login-card">
+        <div className="login-header">
+          <span className="brand-mark"><Sparkles size={18} /></span>
+          <span className="eyebrow">Панель менеджера</span>
+        </div>
+        <h1>С возвращением.</h1>
+        <p>Войдите, чтобы управлять заказами и каталогом.</p>
+        <form onSubmit={submit}>
+          <label>
+            Логин
+            <input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" data-testid="input-admin-login" />
+          </label>
+          <label>
+            Пароль
+            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" data-testid="input-admin-password" />
+          </label>
+          {error && <span className="form-error">{error}</span>}
+          <button className="primary-button" type="submit" disabled={loginMutation.isPending} data-testid="button-admin-login">
+            {loginMutation.isPending ? "Проверяем..." : <>Войти <ArrowRight size={17} /></>}
+          </button>
+        </form>
+        <small>Доступ для менеджера</small>
+      </div>
+    </main>
+  );
 }
 
 function Admin() {
@@ -161,17 +187,104 @@ function Admin() {
   }, []);
   if (!loggedIn) return <AdminLogin onLogin={() => setLoggedIn(true)} />;
   const changeStatus = (order: Order, status: OrderStatus) => updateStatus.mutate({ id: order.id, data: { status } }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() }); queryClient.invalidateQueries({ queryKey: getGetOrderSummaryQueryKey() }); } });
-  const summaryCards: Array<{ label: string; value: ReactNode; icon: typeof ClipboardList }> = [
-    { label: "Всего заказов", value: summary?.totalOrders ?? 0, icon: ClipboardList },
-    { label: "Новые", value: summary?.newOrders ?? 0, icon: Clock3 },
-    { label: "В работе", value: (summary?.pickingOrders ?? 0) + (summary?.deliveryOrders ?? 0), icon: Truck },
-    { label: "Выручка", value: currency.format(summary?.totalRevenue ?? 0), icon: ShoppingBag },
+  const summaryCards: Array<{ label: string; value: ReactNode; icon: typeof ClipboardList; color: string }> = [
+    { label: "Всего заказов", value: summary?.totalOrders ?? 0, icon: ClipboardList, color: "#3b82f6" },
+    { label: "Новые", value: summary?.newOrders ?? 0, icon: Clock3, color: "#f59e0b" },
+    { label: "В работе", value: (summary?.pickingOrders ?? 0) + (summary?.deliveryOrders ?? 0), icon: Truck, color: "#8b5cf6" },
+    { label: "Выручка", value: currency.format(summary?.totalRevenue ?? 0), icon: ShoppingBag, color: "#10b981" },
   ];
-  return <main className="admin-page"><section className="admin-heading"><div><span className="eyebrow">Операционная панель</span><h1>Заказы</h1><p>Следите за сборкой и доставкой в одном месте.</p></div><button className="outline-button" onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => setLoggedIn(false) })} data-testid="button-admin-logout">Выйти</button></section>
-    <section className="summary-grid">{summaryCards.map(({ label, value, icon: Icon }) => <div className="summary-card" key={label}><Icon size={18} /><span>{label}</span><strong data-testid={`summary-${label}`}>{value}</strong></div>)}</section>
-    <section className="orders-card"><div className="orders-toolbar"><h2>Все заказы</h2><div className="status-filter">{["", "new", "picking", "delivery", "completed"].map((item) => <button key={item || "all"} className={statusFilter === item ? "filter-pill active" : "filter-pill"} onClick={() => setStatusFilter(item)} data-testid={`button-filter-${item || "all"}`}>{item ? statusLabels[item as OrderStatus] : "Все"}</button>)}</div></div>
-      {ordersQuery.isLoading ? <div className="loading-state">Загружаем заказы...</div> : orders.length === 0 ? <div className="empty-state"><ClipboardList size={24} /><h3>Заказов пока нет</h3><p>Новые заказы клиентов появятся здесь.</p></div> : <div className="orders-list">{orders.map((order) => { const Icon = statusIcons[order.status]; return <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}><div className="order-number">№{String(order.id).padStart(4, "0")}<small>{new Date(order.createdAt).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" })}</small></div><div className="order-client"><strong>{order.clientName}</strong><span>{order.phone} · {order.address}</span><small>{order.items.map((item) => `${item.productName} × ${item.quantity}`).join(", ")}</small></div><strong className="order-total">{currency.format(order.totalSum)}</strong><div className={`status-badge status-${order.status}`}><Icon size={14} />{statusLabels[order.status]}</div><div className="status-select-wrap"><select value={order.status} onChange={(event) => changeStatus(order, event.target.value as OrderStatus)} disabled={updateStatus.isPending} aria-label={`Статус заказа ${order.id}`} data-testid={`select-status-${order.id}`}>{Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><ChevronDown size={14} /></div></div>; })}</div>}
-     </section><CatalogManager /></main>;
+  return (
+    <main className="admin-page">
+      <section className="admin-heading">
+        <div>
+          <span className="eyebrow">Операционная панель</span>
+          <h1>Заказы</h1>
+          <p>Следите за сборкой и доставкой в одном месте.</p>
+        </div>
+        <button className="outline-button" onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => setLoggedIn(false) })} data-testid="button-admin-logout">
+          Выйти
+        </button>
+      </section>
+      
+      <section className="summary-grid">
+        {summaryCards.map(({ label, value, icon: Icon, color }) => (
+          <div className="summary-card" key={label} style={{ borderLeft: `3px solid ${color}` }}>
+            <Icon size={18} style={{ color }} />
+            <span>{label}</span>
+            <strong data-testid={`summary-${label}`}>{value}</strong>
+          </div>
+        ))}
+      </section>
+      
+      <section className="orders-card">
+        <div className="orders-toolbar">
+          <h2>Все заказы</h2>
+          <div className="status-filter">
+            {["", "new", "picking", "delivery", "completed"].map((item) => (
+              <button 
+                key={item || "all"} 
+                className={statusFilter === item ? "filter-pill active" : "filter-pill"} 
+                onClick={() => setStatusFilter(item)} 
+                data-testid={`button-filter-${item || "all"}`}
+              >
+                {item ? statusLabels[item as OrderStatus] : "Все"}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {ordersQuery.isLoading ? (
+          <div className="loading-state">Загружаем заказы...</div>
+        ) : orders.length === 0 ? (
+          <div className="empty-state">
+            <ClipboardList size={24} />
+            <h3>Заказов пока нет</h3>
+            <p>Новые заказы клиентов появятся здесь.</p>
+          </div>
+        ) : (
+          <div className="orders-list">
+            {orders.map((order) => {
+              const Icon = statusIcons[order.status];
+              return (
+                <div className="order-row" key={order.id} data-testid={`row-order-${order.id}`}>
+                  <div className="order-number">
+                    №{String(order.id).padStart(4, "0")}
+                    <small>{new Date(order.createdAt).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" })}</small>
+                  </div>
+                  <div className="order-client">
+                    <strong>{order.clientName}</strong>
+                    <span>{order.phone} · {order.address}</span>
+                    <small>{order.items.map((item) => `${item.productName} × ${item.quantity}`).join(", ")}</small>
+                  </div>
+                  <strong className="order-total">{currency.format(order.totalSum)}</strong>
+                  <div className={`status-badge status-${order.status}`}>
+                    <Icon size={14} />
+                    {statusLabels[order.status]}
+                  </div>
+                  <div className="status-select-wrap">
+                    <select 
+                      value={order.status} 
+                      onChange={(event) => changeStatus(order, event.target.value as OrderStatus)} 
+                      disabled={updateStatus.isPending} 
+                      aria-label={`Статус заказа ${order.id}`} 
+                      data-testid={`select-status-${order.id}`}
+                    >
+                      {Object.entries(statusLabels).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+      
+      <CatalogManager />
+    </main>
+  );
 }
 
 function Router() {
