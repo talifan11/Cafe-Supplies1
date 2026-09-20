@@ -53,7 +53,7 @@ function ProductEditor({ product, categories, onDone }: { product: Product | nul
   const form = useForm<ProductFormValues>({ defaultValues: emptyProduct });
   const category = form.watch("category");
   const { uploadFile, isUploading, error: uploadError } = useUpload({
-    onSuccess: (result) => form.setValue("imageUrl", `/api/storage${result.objectPath}`, { shouldDirty: true }),
+    onSuccess: (result) => form.setValue("imageUrl", result.objectPath, { shouldDirty: true }),
   });
 
   useEffect(() => {

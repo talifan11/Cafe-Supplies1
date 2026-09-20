@@ -40,8 +40,9 @@ router.post(
       const { name, size, contentType } = parsed.data;
 
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      const objectPath =
-        objectStorageService.normalizeObjectEntityPath(uploadURL);
+      // Return the path that the frontend can use to fetch the image
+      // The uploadURL is a presigned GCS URL, we need to convert it to our API path
+      const objectPath = `/api/storage/objects${uploadURL.split('/objects/')[1]?.split('?')[0] || ''}`;
 
       res.json(
         RequestUploadUrlResponse.parse({
