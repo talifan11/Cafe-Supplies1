@@ -22,6 +22,7 @@ import type { Order, OrderInput, OrderStatus, Product } from "@workspace/api-cli
 import { ArrowRight, Check, ChevronDown, ClipboardList, Clock3, Minus, Package, Plus, Search, ShoppingBag, Sparkles, Truck, X } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { CatalogManager } from "@/components/catalog-manager";
+import WarehousePage from "@/pages/warehouse";
 
 type CartLine = { product: Product; quantity: number };
 type CheckoutForm = Pick<OrderInput, "clientName" | "phone" | "address">;
@@ -42,6 +43,7 @@ function AppShell({ children }: { children: ReactNode }) {
         <nav className="main-nav" aria-label="Основная навигация">
           <Link href="/" className={location === "/" ? "nav-link active" : "nav-link"} data-testid="link-catalog">Каталог</Link>
           <Link href="/admin" className={location === "/admin" ? "nav-link active" : "nav-link"} data-testid="link-admin">Заказы</Link>
+          <Link href="/warehouse" className={location === "/warehouse" ? "nav-link active" : "nav-link"} data-testid="link-warehouse">Склад</Link>
         </nav>
         <div className="topbar-note"><span className="online-dot" /> Отгружаем каждый день</div>
       </header>
@@ -173,7 +175,7 @@ function Admin() {
 }
 
 function Router() {
-  return <AppShell><Switch><Route path="/" component={Catalog} /><Route path="/admin" component={Admin} /><Route component={NotFound} /></Switch></AppShell>;
+  return <AppShell><Switch><Route path="/" component={Catalog} /><Route path="/admin" component={Admin} /><Route path="/warehouse" component={WarehousePage} /><Route component={NotFound} /></Switch></AppShell>;
 }
 
 const queryClient = new QueryClient();
