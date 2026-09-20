@@ -94,14 +94,15 @@ button { cursor: pointer; }
 @media (max-width: 1000px) { .catalog-layout { grid-template-columns: 1fr; }.cart-panel { position: static; }.product-grid { grid-template-columns: repeat(3, 1fr); }.cart-panel { display: none; }.mobile-cart-button { position: fixed; z-index: 5; bottom: 16px; left: 16px; right: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; background: var(--ink); color: var(--paper); box-shadow: 0 7px 20px rgba(20,40,33,.25); padding: 15px; font-size: 12px; }.mobile-cart-button strong { color: var(--lime); margin-left: auto; } }
 @media (max-width: 700px) { .topbar { height: 67px; padding: 0 20px; gap: 20px; }.brand { min-width: auto; }.main-nav { gap: 15px; }.nav-link { padding: 24px 0 21px; font-size: 11px; }.topbar-note { display: none; }.catalog-page, .admin-page { padding-left: 20px; padding-right: 20px; }.catalog-hero { min-height: 280px; padding: 45px 0 30px; }.catalog-hero h1 { font-size: 44px; }.hero-stamp { width: 84px; height: 84px; flex: 0 0 84px; }.hero-stamp span { font-size: 18px; }.hero-stamp small { font-size: 7px; }.catalog-toolbar { display: block; }.search-wrap { width: 100%; }.search-wrap input { width: 100%; }.category-tabs { margin-top: 12px; }.product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }.product-image { height: 130px; }.product-content { padding: 12px 10px; }.product-content h3 { font-size: 12px; min-height: 34px; margin: 12px 0; }.product-bottom { display: block; }.product-bottom strong { display: block; margin-bottom: 9px; }.add-button { width: 100%; justify-content: center; }.footer { padding-left: 20px; padding-right: 20px; display: block; line-height: 2; }.footer span { display: block; }.admin-page { padding-top: 35px; }.admin-heading { align-items: start; }.admin-heading h1 { font-size: 44px; }.summary-grid { grid-template-columns: repeat(2, 1fr); gap: 9px; }.summary-card { padding: 13px; }.summary-card strong { font-size: 20px; }.orders-toolbar { display: block; padding: 15px; }.status-filter { margin-top: 14px; overflow-x: auto; }.order-row { grid-template-columns: 60px minmax(0, 1fr); gap: 10px; padding: 15px; }.order-total, .status-badge, .status-select-wrap { grid-column: 2; }.order-total { grid-row: 2; }.status-badge { grid-row: 3; }.status-select-wrap { grid-row: 4; }.checkout-modal { padding: 29px 21px; }.success-wrap { padding: 45px 20px 80px; }.success-screen { padding: 52px 25px; } }
 
-.catalog-manager { margin-top: 28px; padding: 28px; background: var(--card); border: 1px solid var(--line); }
-.manager-section-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
+.catalog-manager { margin-top: 28px; padding: 28px; background: var(--card); border: 1px solid var(--line); overflow-x: auto; }
+.manager-section-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; flex-wrap: wrap; }
 .manager-section-heading h2, .manager-section-heading h3 { margin: 8px 0 6px; letter-spacing: -.04em; }
 .manager-section-heading h2 { font-size: 28px; }
 .manager-section-heading h2 em { color: var(--ink-soft); font: 11px var(--app-font-mono); font-style: normal; letter-spacing: 0; }
-.manager-section-heading p { color: var(--ink-soft); margin: 0; font-size: 12px; }
-.catalog-manager-heading { margin-bottom: 21px; }
-.catalog-manager-heading .primary-button { flex-shrink: 0; }
+.manager-section-heading p { color: var(--ink-soft); margin: 0; font-size: 12px; max-width: 600px; }
+.catalog-manager-heading { margin-bottom: 21px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.catalog-manager-heading > div { flex: 1; min-width: 0; }
+.catalog-manager-heading .primary-button { flex-shrink: 0; white-space: nowrap; }
 .product-admin-table { border-top: 1px solid var(--line); }
 .product-admin-head, .product-admin-row { display: grid; grid-template-columns: minmax(240px, 2.4fr) 1.4fr .75fr .65fr 78px; gap: 15px; align-items: center; }
 .product-admin-head { padding: 11px 0; color: var(--ink-soft); font: 9px var(--app-font-mono); text-transform: uppercase; letter-spacing: .08em; }
