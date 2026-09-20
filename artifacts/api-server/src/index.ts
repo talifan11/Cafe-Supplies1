@@ -1,7 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import path from "path";
-import { fileURLToPath } from "url";
 import express from "express";
 
 const rawPort = process.env["PORT"];
@@ -18,16 +17,16 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-// Настройка раздачи статических файлов (фронтенда)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const frontendPath = path.join(__dirname, "../../cafe-supply-crm/dist/public");
+// Абсолютный путь к собранным файлам фронтенда на VPS
+const frontendPath = "/var/www/cafe-supplies/artifacts/cafe-supply-crm/dist/public";
 
+// Раздаем статические файлы (CSS, JS, картинки)
 app.use(express.static(frontendPath));
 
-// Исправленный роут для React Router (Express 5 требует {*path})
+// Обрабатываем все остальные запросы для React Router
+// В Express 5 используется синтаксис {*path} вместо *
 app.get("/{*path}", (req, res) => {
-  // Если это не API запрос, отдаем index.html
+  // Если запрос не начинается с /api, отдаем главную страницу
   if (!req.path.startsWith("/api")) {
     res.sendFile(path.join(frontendPath, "index.html"));
   }
